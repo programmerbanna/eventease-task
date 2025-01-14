@@ -1,52 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { GET_EVENTS } from '@/graphql/queries/event.queries';
-import { REGISTER_ATTENDEE, UNREGISTER_ATTENDEE } from '@/graphql/mutations/attendee.mutations';
 import ProtectedLayout from '@/components/layout/ProtectedLayout';
 import EventList from '@/components/events/EventList';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useEventAttendance } from '@/hooks/useEventAttendance';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 export default function DashboardPage() {
-    const { user, isLoading: isAuthLoading } = useAuth();
-    const { addNotification } = useNotifications();
+    const { user } = useAuth();
+    const { registerForEvent, unregisterFromEvent } = useEventAttendance();
     const { data, loading: isEventsLoading, error } = useQuery(GET_EVENTS);
-
-    const [registerAttendee] = useMutation(REGISTER_ATTENDEE);
-    const [unregisterAttendee] = useMutation(UNREGISTER_ATTENDEE);
-
-    const handleRegister = async (eventId: string) => {
-        try {
-            await registerAttendee({ variables: { eventId } });
-            addNotification({
-                type: 'success',
-                message: 'Successfully registered for event',
-            });
-        } catch (error) {
-            addNotification({
-                type: 'error',
-                message: 'Failed to register for event',
-            });
-        }
-    };
-
-    const handleUnregister = async (eventId: string) => {
-        try {
-            await unregisterAttendee({ variables: { eventId } });
-            addNotification({
-                type: 'success',
-                message: 'Successfully unregistered from event',
-            });
-        } catch (error) {
-            addNotification({
-                type: 'error',
-                message: 'Failed to unregister from event',
-            });
-        }
-    };
 
     if (!user?.id) {
         return null;
@@ -67,8 +33,8 @@ export default function DashboardPage() {
                     </div>
                     <EventList
                         events={data?.findAllEvents || []}
-                        onRegister={handleRegister}
-                        onUnregister={handleUnregister}
+                        onRegister={registerForEvent}
+                        onUnregister={unregisterFromEvent}
                         currentUserId={user.id}
                     />
                 </div>

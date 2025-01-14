@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ApolloWrapper } from "@/providers/ApolloWrapper";
+import { NotificationProvider } from '@/providers/NotificationProvider';
+import NotificationContainer from '@/components/notifications/NotificationContainer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ApolloWrapper>
-          {children}
+          <NotificationProvider>
+            {children}
+            <NotificationContainer />
+          </NotificationProvider>
         </ApolloWrapper>
       </body>
     </html>

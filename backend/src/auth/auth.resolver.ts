@@ -16,16 +16,15 @@ export class AuthResolver {
     @Args('loginInput') loginInput: LoginInput,
     @Context() context: any,
   ) {
-    console.log('Login attempt for:', loginInput.email);
     const user = context.req.user;
-    console.log('User from context:', user);
-
     if (!user) {
       throw new UnauthorizedException('Authentication failed');
     }
 
     const result = await this.authService.login(user);
-    console.log('Login result:', result);
+    if (!result || !result.accessToken) {
+      throw new UnauthorizedException('Failed to generate auth token');
+    }
 
     context.res.cookie('Authentication', result.accessToken, {
       httpOnly: true,
@@ -38,7 +37,20 @@ export class AuthResolver {
   }
 
   @Mutation(() => Auth)
-  async register(@Args('registerInput') registerInput: RegisterInput) {
-    return this.authService.register(registerInput);
+  async register(
+    @Args('registerInput') registerInput: RegisterInput,
+    @Context() context: any,
+  ) {
+    const result = await this.authService.register(registerInput);
+
+    // Set cookie after successful registration
+    context.res.cookie('Authentication', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    return result;
   }
 }

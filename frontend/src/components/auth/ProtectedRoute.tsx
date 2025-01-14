@@ -6,15 +6,15 @@ import { useAuth } from '@/hooks/useAuth';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated && pathname !== '/login') {
+        if (!isLoading && !user?.id && pathname !== '/login') {
             router.push('/login');
         }
-    }, [isAuthenticated, isLoading, router, pathname]);
+    }, [isLoading, user, router, pathname]);
 
     if (isLoading) {
         return (
@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         );
     }
 
-    if (!isAuthenticated) {
+    if (!user?.id && pathname !== '/login') {
         return null;
     }
 

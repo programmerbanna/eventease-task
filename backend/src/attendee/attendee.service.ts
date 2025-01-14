@@ -11,6 +11,7 @@ export class AttendeeService {
   ) {}
 
   async register(registerAttendeeInput: RegisterAttendeeInput, userId: string) {
+    console.log('Register attempt:', { registerAttendeeInput, userId });
     const event = await this.prisma.event.findUnique({
       where: { id: registerAttendeeInput.eventId },
       include: { attendees: true },
@@ -43,11 +44,16 @@ export class AttendeeService {
 
     const attendee = updatedEvent.attendees.find((a) => a.id === userId);
     if (attendee) {
-      this.realtimeGateway.emitNewAttendee(event.id, attendee);
+      console.log('About to emit newAttendee event:', {
+        eventId: event.id,
+        attendee,
+        eventTitle: event.title,
+      });
+      this.realtimeGateway.emitNewAttendee(event.id, attendee, event.title);
     }
 
     if (updatedEvent.attendees.length >= updatedEvent.maxAttendees) {
-      this.realtimeGateway.emitEventFull(event.id);
+      this.realtimeGateway.emitEventFull(event.id, event.title);
     }
 
     return updatedEvent;
@@ -56,18 +62,22 @@ export class AttendeeService {
   async unregister(eventId: string, userId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
-      include: { attendees: true },
+      include: {
+        attendees: true,
+        creator: true,
+      },
     });
 
     if (!event) {
       throw new ForbiddenException('Event not found');
     }
 
-    if (!event.attendees.some((attendee) => attendee.id === userId)) {
+    const attendee = event.attendees.find((a) => a.id === userId);
+    if (!attendee) {
       throw new ForbiddenException('You are not registered for this event');
     }
 
-    return this.prisma.event.update({
+    const updatedEvent = await this.prisma.event.update({
       where: { id: eventId },
       data: {
         attendees: {
@@ -79,5 +89,13 @@ export class AttendeeService {
         attendees: true,
       },
     });
+
+    this.realtimeGateway.emitAttendeeUnregistered(
+      eventId,
+      attendee,
+      event.title,
+    );
+
+    return updatedEvent;
   }
 }

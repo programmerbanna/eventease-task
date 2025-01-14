@@ -16,7 +16,7 @@ export class EventResolver {
     @Args('createEventInput') createEventInput: CreateEventInput,
     @Context() context,
   ) {
-    return this.eventsService.create(createEventInput, context.req.user.userId);
+    return this.eventsService.create(createEventInput, context.req.user.id);
   }
 
   @Query(() => [Event])
@@ -38,13 +38,13 @@ export class EventResolver {
     return this.eventsService.update(
       updateEventInput.id,
       updateEventInput,
-      context.req.user.userId,
+      context.req.user.id,
     );
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   removeEvent(@Args('id') id: string, @Context() context) {
-    return this.eventsService.remove(id, context.req.user.userId);
+    return this.eventsService.remove(id, context.req.user.id);
   }
 }

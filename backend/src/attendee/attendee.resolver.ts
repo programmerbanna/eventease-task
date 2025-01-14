@@ -11,22 +11,25 @@ export class AttendeeResolver {
 
   @Mutation(() => Event)
   @UseGuards(JwtAuthGuard)
-  registerAttendee(
+  async registerAttendee(
     @Args('registerAttendeeInput') registerAttendeeInput: RegisterAttendeeInput,
     @Context() context,
   ) {
-    return this.attendeeService.register(
+    const userId = context.req.user.id;
+    console.log('Registering attendee with:', {
       registerAttendeeInput,
-      context.req.user.userId,
-    );
+      userId,
+    });
+    return this.attendeeService.register(registerAttendeeInput, userId);
   }
 
   @Mutation(() => Event)
   @UseGuards(JwtAuthGuard)
-  unregisterAttendee(
+  async unregisterAttendee(
     @Args('eventId') eventId: string,
     @Context() context,
   ) {
-    return this.attendeeService.unregister(eventId, context.req.user.userId);
+    const userId = context.req.user.id;
+    return this.attendeeService.unregister(eventId, userId);
   }
 }
