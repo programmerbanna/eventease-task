@@ -1,0 +1,84 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Auth {
+  accessToken: String!
+  user: User!
+}
+
+input CreateEventInput {
+  date: String!
+  description: String!
+  location: String!
+  maxAttendees: Int!
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Event {
+  attendees: [User!]!
+  createdAt: DateTime!
+  creator: User!
+  creatorId: String!
+  date: DateTime!
+  description: String!
+  id: ID!
+  location: String!
+  maxAttendees: Int!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createEvent(createEventInput: CreateEventInput!): Event!
+  login(loginInput: LoginInput!): Auth!
+  register(registerInput: RegisterInput!): Auth!
+  registerAttendee(registerAttendeeInput: RegisterAttendeeInput!): Event!
+  removeEvent(id: String!): Boolean!
+  unregisterAttendee(eventId: String!): Event!
+  updateEvent(updateEventInput: UpdateEventInput!): Event!
+}
+
+type Query {
+  findAllEvents: [Event!]!
+  findOneEvent(id: String!): Event!
+  getHello: String!
+  me: User!
+}
+
+input RegisterAttendeeInput {
+  eventId: String!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input UpdateEventInput {
+  date: String
+  description: String
+  id: ID!
+  location: String
+  maxAttendees: Int
+  title: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}

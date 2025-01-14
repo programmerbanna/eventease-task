@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: eventease-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/graphql
+      - NEXT_PUBLIC_WS_URL=ws://localhost:5000
+    command: npm run dev
+    env_file:
+      - ../.env
